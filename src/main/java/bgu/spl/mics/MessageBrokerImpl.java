@@ -16,7 +16,7 @@ public class MessageBrokerImpl implements MessageBroker {
 		private static MessageBrokerImpl instance = new MessageBrokerImpl();
 	}
 
-	private Map<Class<? extends Message>, BlockingQueue<Subscriber>> topicMap;  //this map is mapping between a type of message and the queue of subscribers to this kind of message
+	private Map<Class<? extends Message>, Queue<Subscriber>> topicMap;  //this map is mapping between a type of message and the queue of subscribers to this kind of message
 	private Map<Event, Future> futureMap;   //this map is mapping between a event and a future related to this event
 	private Map<Subscriber, BlockingQueue<Message>> subscribersMap;    //this map is mapping between a subscriber and the queue of messages he not yet accomplished
 	private Map<Subscriber, List<Class<? extends Message>>> subscriberTopics;  //this map is mapping between a subscriber and kind of messages it subscribed to (in order to delete this subscriber)
@@ -38,7 +38,7 @@ public class MessageBrokerImpl implements MessageBroker {
 
 	@Override
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, Subscriber m) {
-		topicMap.putIfAbsent(type, new LinkedBlockingQueue<>());
+		topicMap.putIfAbsent(type, new ConcurrentLinkedQueue<>());
 		topicMap.get(type).add(m);
 		subscriberTopics.get(m).add(type);
 	}
@@ -68,10 +68,11 @@ public class MessageBrokerImpl implements MessageBroker {
 
 	@Override
 	public synchronized  <T> Future<T> sendEvent(Event<T> e) {
-		BlockingQueue<Subscriber> queue = topicMap.get(e.getClass());
+		Queue<Subscriber> queue = topicMap.get(e.getClass());
 		if (queue != null) {
 			Subscriber sub = queue.poll();
-			if(sub == null)return null;
+			if(sub == null)
+				return null;
 			subscribersMap.get(sub).add(e);
 			queue.add(sub);
 		}

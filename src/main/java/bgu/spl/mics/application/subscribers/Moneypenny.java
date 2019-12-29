@@ -17,6 +17,7 @@ public class Moneypenny extends Subscriber {
 	private Squad squad;
 	private int id;
 	static AtomicInteger nextID = new AtomicInteger(0);
+	private final int MILIS = 100;
 
 
 	public Moneypenny() {
@@ -27,30 +28,26 @@ public class Moneypenny extends Subscriber {
 
 	@Override
 	protected void initialize() {
-		subscribeEvent(AgentsAvailableEvent.class,(event)->complete(event,getAgents(event.getAgents())));
-		subscribeEvent(MissionAbortedEvent.class,(event)->complete(event,releaseAgents(event.getAgents())));
-		subscribeEvent(MissionExecutedEvent.class, (event)->complete(event,sendAgents(event.getAgents(),event.getDuertion())));
+		if(id % 2 == 0)subscribeEvent(AgentsAvailableEvent.class,(event)->complete(event,getAgents(event.getAgents())));
+		else{
+			subscribeEvent(MissionAbortedEvent.class,(event)->complete(event,releaseAgents(event.getAgents())));
+			subscribeEvent(MissionExecutedEvent.class, (event)->complete(event,sendAgents(event.getAgents(),event.getDuertion())));
+		}
 		subscribeBroadcast(SystemSDBroadcast.class,(event)->terminate());
 	}
 
 	private Integer getAgents(List<String> agents) {
-		if(squad.getAgents(agents)){
-			System.out.println("agents aquired");
-			return id;
-		}
+		if(squad.getAgents(agents)) return id;
 		return -1;
 	}
 
 	private List<String> sendAgents(List<String> agents , int duertion) {
-		squad.sendAgents(agents,duertion);
-		System.out.println("agents sent");
+		squad.sendAgents(agents,duertion * MILIS);
 		return squad.getAgentsNames(agents);
 	}
 
 	private Boolean releaseAgents(List<String> agents) {
 		squad.releaseAgents(agents);
-		System.out.println("agents released");
 		return true;
 	}
-
 }

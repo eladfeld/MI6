@@ -42,9 +42,13 @@ public class Squad {
 	/**
 	 * Releases agents.
 	 */
-	public void releaseAgents(List<String> serials) {
-		for (String serialNum : serials)
-			agents.get(serialNum).release();
+	public synchronized void releaseAgents(List<String> serials) {
+		Agent a;
+		for (String serialNum : serials) {
+			a = agents.get(serialNum);
+			if(a != null)a.release();
+		}
+		notifyAll();
 	}
 
 	/**

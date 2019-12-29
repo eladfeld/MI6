@@ -37,7 +37,6 @@ public class Intelligence extends Subscriber {
 	private void initializeMissions(int time) {
 		for(MissionInfo mission : missions){
 			if(time == mission.getTimeIssued()){
-				System.out.println(mission.getMissionName()+ " misssion lunched by " + getName());
 				Event sandMission = new MissionReceivedEvent(mission);
 				getSimplePublisher().sendEvent(sandMission);
 			}

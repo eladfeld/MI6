@@ -1,5 +1,10 @@
 {
   "gadgets": [
-    "Geiger counter"
+    "Mission1Tool",
+    "Mission2Tool",
+    "Mission3Tool",
+    "Mission4Tool",
+    "Mission5Tool",
+    "Mission6Tool"
   ]
 }

@@ -18,15 +18,9 @@ import static java.lang.Thread.sleep;
  */
 public class MI6Runner {
     public static void main(String[] args) throws Exception {
-       // if(args.length < 3)throw new IllegalArgumentException("not enough progrem argumnets");
+        if(args.length < 3)throw new IllegalArgumentException("not enough arguments");
         List<Thread> threads = createSystem(args[0]);
-        for(Thread thread : threads)thread.start();
-       // Thread.sleep(2500);
-
-
-
-
-        //after finishing
+        for(Thread thread : threads) thread.start();
         for(Thread thread : threads)thread.join();
         Diary diary = Diary.getInstance();
         Inventory inventory = Inventory.getInstance();

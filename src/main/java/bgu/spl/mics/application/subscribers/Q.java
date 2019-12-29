@@ -28,7 +28,6 @@ public class Q extends Subscriber {
 		subscribeBroadcast(SystemSDBroadcast.class,(event)->terminate());
 	}
 	private Pair<Boolean,Integer> getItem(String gadget){
-		System.out.println(gadget + " taken in time tick : " + time);
 		return new Pair<>(inventory.getItem(gadget),time);
 	}
 }

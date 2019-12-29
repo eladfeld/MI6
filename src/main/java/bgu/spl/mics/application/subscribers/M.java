@@ -38,14 +38,19 @@ public class M extends Subscriber {
 
 	private Boolean initializeMission(MissionInfo mission) {
 		diary.incrementTotal();
-		Event ageCheck = new AgentsAvailableEvent(mission.getSerialAgentsNumbers());
-		Future<Integer> agentsCheck = getSimplePublisher().sendEvent(ageCheck);
-		if (agentsCheck.get() != -1) {
+		Event agentCheck = new AgentsAvailableEvent(mission.getSerialAgentsNumbers());
+		Future<Integer> agentsCheck = getSimplePublisher().sendEvent(agentCheck);
+		if ( agentsCheck != null && agentsCheck.get() != -1) {
 			Event gadCheck = new GadgetAvailableEvent(mission.getGadget());
 			Future<Pair<Boolean,Integer>> gadgetCheck = getSimplePublisher().sendEvent(gadCheck);
-			Pair<Boolean,Integer> qPair= gadgetCheck.get();
+			if(gadgetCheck == null){
+				terminate();
+				return false;
+			}
+			Pair<Boolean,Integer> qPair = gadgetCheck.get();
 			boolean gadgetTaken = qPair.getFirst();
 			int qtime = qPair.getSecound();
+
 			if (gadgetTaken) {
 				if (time <= mission.getTimeExpired()) {
 					Event ExecuteMission = new MissionExecutedEvent(mission.getSerialAgentsNumbers(), mission.getDuration());
@@ -59,14 +64,12 @@ public class M extends Subscriber {
 					Report report = new Report(missionName, id, monneypennyNum, SerialAgentsNumbers
 							, agentsName, gadget, qtime, time, timeIssued);
 					diary.addReport(report);
-					System.out.println(missionName + " succeed by " + getName());
 					return true;
 				}
 			}
 		}
 		Event abortMission = new MissionAbortedEvent(mission.getSerialAgentsNumbers());
 		getSimplePublisher().sendEvent(abortMission);
-		System.out.println(mission.getMissionName() + " aborted");
 		return false;
 	}
 
