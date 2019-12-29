@@ -1,4 +1,39 @@
 {
-  "reports": [],
-  "total": 0
+  "reports": [
+    {
+      "missionName": "The World Is Not Enough",
+      "mNum": 2,
+      "moneypennyNum": 2,
+      "agentsSerialNumbers": [
+        "006",
+        "007"
+      ],
+      "agentsNames": [
+        "Alec Trevelyan",
+        "James Bond"
+      ],
+      "gadget": "X-ray glasses",
+      "qTime": 3,
+      "timeIssued": 3,
+      "timeCreated": 3
+    },
+    {
+      "missionName": "Thunderball",
+      "mNum": 1,
+      "moneypennyNum": 2,
+      "agentsSerialNumbers": [
+        "006",
+        "007"
+      ],
+      "agentsNames": [
+        "Alec Trevelyan",
+        "James Bond"
+      ],
+      "gadget": "Sky Hook",
+      "qTime": 5,
+      "timeIssued": 3,
+      "timeCreated": 3
+    }
+  ],
+  "total": 4
 }

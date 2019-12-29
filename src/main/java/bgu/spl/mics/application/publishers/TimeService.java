@@ -24,7 +24,7 @@ public class TimeService extends Publisher {
 	public TimeService(int terminateTime) {
 		super("TimeService");
 		this.terminateTime = terminateTime;
-		runningTime = 1;
+		runningTime = 0;
 	}
 
 	@Override
@@ -33,6 +33,7 @@ public class TimeService extends Publisher {
 
 	@Override
 	public void run() {
+		try { Thread.sleep(500); } catch (InterruptedException e){}
 		initialize();
 		while(runningTime <= terminateTime){
 			Broadcast tickBroadcast = new TickBroadcast(runningTime);

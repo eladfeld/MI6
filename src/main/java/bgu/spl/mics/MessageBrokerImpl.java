@@ -1,4 +1,5 @@
 package bgu.spl.mics;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -16,17 +17,18 @@ public class MessageBrokerImpl implements MessageBroker {
 		private static MessageBrokerImpl instance = new MessageBrokerImpl();
 	}
 
-	private Map<Class<? extends Message>, Queue<Subscriber>> topicMap;  //this map is mapping between a type of message and the queue of subscribers to this kind of message
-	private Map<Event, Future> futureMap;   //this map is mapping between a event and a future related to this event
-	private Map<Subscriber, BlockingQueue<Message>> subscribersMap;    //this map is mapping between a subscriber and the queue of messages he not yet accomplished
-	private Map<Subscriber, List<Class<? extends Message>>> subscriberTopics;  //this map is mapping between a subscriber and kind of messages it subscribed to (in order to delete this subscriber)
-
+	private Map<Class<? extends Message>, Queue<Subscriber>> topicMap;  //this map is mapping between a type of message and the queue of subscribers to this kind of message.
+	private Map<Event, Future> futureMap;   //this map is mapping between a event and a future related to this event.
+	private Map<Subscriber, BlockingQueue<Message>> subscribersMap;    //this map is mapping between a subscriber and the queue of messages he not yet accomplished.
+	private Map<Subscriber, List<Class<? extends Message>>> subscriberTopics;  //this map is mapping between a subscriber and kind of messages it subscribed to (in order to delete this subscriber).
+	private Map<Subscriber, BlockingQueue<Event>> subscribersEvents;   //this map is mapping between a subscriber and it's Events in order to resolve this subscriber's futures.
 
 	private MessageBrokerImpl() {
 		topicMap = new ConcurrentHashMap<>();
 		futureMap = new ConcurrentHashMap<>();
 		subscribersMap = new ConcurrentHashMap<>();
 		subscriberTopics = new ConcurrentHashMap<>();
+		subscribersEvents = new ConcurrentHashMap<>();
 	}
 
 	/**
@@ -71,9 +73,9 @@ public class MessageBrokerImpl implements MessageBroker {
 		Queue<Subscriber> queue = topicMap.get(e.getClass());
 		if (queue != null) {
 			Subscriber sub = queue.poll();
-			if(sub == null)
-				return null;
+			if(sub == null) return null;
 			subscribersMap.get(sub).add(e);
+			subscribersEvents.get(sub).add(e);
 			queue.add(sub);
 		}
 		Future future = new Future();
@@ -85,11 +87,14 @@ public class MessageBrokerImpl implements MessageBroker {
 	public void register(Subscriber m) {
 		subscribersMap.put(m, new LinkedBlockingQueue<>());
 		subscriberTopics.put(m, new CopyOnWriteArrayList<>());
+		subscribersEvents.put(m, new LinkedBlockingQueue<>());
 	}
 
 	@Override
 	public void unregister(Subscriber m) {
 		subscribersMap.remove(m);
+		BlockingQueue<Event> events = subscribersEvents.get(m);
+		for(Event event : events)futureMap.get(event).resolve(null);
 		for(Class<? extends Message> message : subscriberTopics.get(m)){
 			Queue queue = topicMap.get(message);
 			queue.remove(m);
